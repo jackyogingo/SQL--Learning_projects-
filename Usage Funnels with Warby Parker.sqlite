@@ -1,0 +1,83 @@
+/*Usage Funnels with Warby Parker*/
+/*To help users find their perfect frame, Warby Parker has a Style Quiz */
+/*Quiz Funnel:*/
+/*What is the number of responses for each question*/
+SELECT question, 
+       COUNT( DISTINCT user_id) AS num_per_question 
+FROM survey 
+GROUP BY question;
+
+/*Which question(s) of the quiz have a lower completion rate?
+
+What do you think is the reason?*/
+
+/*Home Try-On Funnel:*/
+
+/* Warby Parker’s purchase funnel is:
+
+Take the Style Quiz → Home Try-On → Purchase the Perfect Pair of Glasses
+
+During the Home Try-On stage, we will be conducting an A/B Test:*/
+
+/*Let’s find out whether or not users who get more pairs to try on at home will be more likely to make a purchase.*/
+
+/SELECT  q.user_id, 
+        h.user_id IS NOT NULL AS 'is_home_try_on',
+        h.number_of_pairs,
+        p.user_id IS NOT NULL AS 'is_purchase'
+FROM quiz q
+LEFT JOIN home_try_on h
+    ON q.user_id = h.user_id
+LEFT JOIN purchase p
+    ON q.user_id = p.user_id
+LIMIT 10;
+
+
+/*We can calculate overall conversion rates by aggregating across all rows*/
+
+/*add a column that counts the total number of rows in funnels. This is the number of users in the “quiz” step of the funnel.*/
+
+/*add another column that sums the 'is_home_try_on' in funnel.This is the number of users in the “home_try_on” step of the funnel.*/
+
+/*add another column that sums the 'is_purchase' column in funnels.This is the number of users in the “purchase” step of the funnel.*/
+
+WITH funnel AS (
+    SELECT  q.user_id, 
+        h.user_id IS NOT NULL AS 'is_home_try_on',
+        h.number_of_pairs,
+        p.user_id IS NOT NULL AS 'is_purchase'
+FROM quiz q
+LEFT JOIN home_try_on h
+    ON q.user_id = h.user_id
+LEFT JOIN purchase p
+    ON q.user_id = p.user_id
+    )
+SELECT COUNT(*) AS 'num_quiz_users',
+        SUM(is_home_try_on) AS 'num_home_try_users',
+        SUM(is_purchase) AS 'num_purchase_users'
+FROM funnel;
+
+/*add column that compares Percentage of users from quiz to home_try_on
+
+add another column that compares Percentage of users from home_try_on to purchase*/
+
+WITH funnel AS (
+    SELECT  q.user_id, 
+        h.user_id IS NOT NULL AS 'is_home_try_on',
+        h.number_of_pairs,
+        p.user_id IS NOT NULL AS 'is_purchase'
+FROM quiz q
+LEFT JOIN home_try_on h
+    ON q.user_id = h.user_id
+LEFT JOIN purchase p
+    ON q.user_id = p.user_id
+    )
+SELECT COUNT(*) AS 'num_quiz_users',
+        SUM(is_home_try_on) AS 'num_home_try_users',
+        SUM(is_purchase) AS 'num_purchase_users',
+        1.0 * SUM(is_home_try_on)/COUNT(user_id) AS 'quiz to home_try_on',
+        1.0 * SUM(is_purchase)/SUM(is_home_try_on) AS 'home_try_on to purchase'
+FROM funnel;
+
+
+
