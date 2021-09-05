@@ -1,7 +1,11 @@
 /*Usage Funnels with Warby Parker*/
+
 /*To help users find their perfect frame, Warby Parker has a Style Quiz */
+
 /*Quiz Funnel:*/
+
 /*What is the number of responses for each question*/
+
 SELECT question, 
        COUNT( DISTINCT user_id) AS num_per_question 
 FROM survey 
