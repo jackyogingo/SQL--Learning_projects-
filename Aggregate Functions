@@ -96,3 +96,4 @@ Use one query and rename the results to max and min.*/
 
 SELECT MAX(watch_duration_in_minutes) AS 'longest event' , MIN(watch_duration_in_minutes) AS 'shortest event'
 FROM watch_history;
+
